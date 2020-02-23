@@ -9,10 +9,10 @@ import com.microsoft.azure.keyvault.requests.*;
 public class App {
     public static void main(String[] args) throws InterruptedException, IllegalArgumentException {
 
-        String keyVaultName = System.getenv("jkv_Name");
+        String keyVaultName = System.getenv("jqs_KeyVaultName");
 
         if (keyVaultName == null || keyVaultName.isBlank()) {
-            System.out.println("Set the jkv_Name environment variable");
+            System.out.println("Set the jqs_KeyVaultName environment variable");
             System.exit(-1);
         }
 
@@ -20,20 +20,15 @@ public class App {
         String kvUrl = "https://" + keyVaultName.trim() + ".vault.azure.net";
         System.out.println(kvUrl);
 
-        // check for use MSI flag
-        Boolean useMsi = false;
-        if (System.getenv("jkv_Auth") == "MSI") {
-            useMsi = true;
-        }
-
         try {
             AzureTokenCredentials cred = null;
 
-            if (useMsi) {
-                // Use Managed Identity
+            // check for jqs_AuthType env var
+            if (System.getenv("jqs_AuthType") == "MSI") {
+                // use Managed Identity
                 cred = new MSICredentials(AzureEnvironment.AZURE);
             } else {
-                // get credentials from Azure CLI cache
+                // use Azure CLI cache
                 cred = AzureCliCredentials.create();
             }
 
