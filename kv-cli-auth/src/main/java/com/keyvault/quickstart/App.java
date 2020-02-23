@@ -24,7 +24,8 @@ public class App {
             AzureTokenCredentials cred = null;
 
             // check for jqs_AuthType env var
-            if (System.getenv("jqs_AuthType") == "MSI") {
+            String isMsi = System.getenv("MSI");
+            if (isMsi != null && isMsi.equals("MSI")) {
                 // use Managed Identity
                 cred = new MSICredentials(AzureEnvironment.AZURE);
             } else {
@@ -33,7 +34,7 @@ public class App {
             }
 
             // can't continue
-            if (cred == null) {
+            if (cred == null || cred.domain() == null){
                 System.out.println("Unable to get credentials");
                 System.exit(-1);
             }
