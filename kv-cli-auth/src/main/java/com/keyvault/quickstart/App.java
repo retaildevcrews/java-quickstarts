@@ -1,5 +1,6 @@
 package com.keyvault.quickstart;
 
+import com.microsoft.azure.AzureEnvironment;
 import com.microsoft.azure.credentials.*;
 import com.microsoft.azure.keyvault.*;
 import com.microsoft.azure.keyvault.models.*;
@@ -19,31 +20,57 @@ public class App {
         String kvUrl = "https://" + keyVaultName.trim() + ".vault.azure.net";
         System.out.println(kvUrl);
 
+        // check for use MSI flag
+        Boolean useMsi = false;
+        if (System.getenv("jkv_Auth") == "MSI") {
+            useMsi = true;
+        }
+
         try {
-            // get credentials from Azure CLI cache
-            AzureTokenCredentials cred = AzureCliCredentials.create();
+            AzureTokenCredentials cred = null;
+
+            if (useMsi) {
+                // Use Managed Identity
+                cred = new MSICredentials(AzureEnvironment.AZURE);
+            } else {
+                // get credentials from Azure CLI cache
+                cred = AzureCliCredentials.create();
+            }
+
+            // can't continue
+            if (cred == null) {
+                System.out.println("Unable to get credentials");
+                System.exit(-1);
+            }
+            System.out.println(cred.domain());
 
             // create Key Vault client
             KeyVaultClient kvClient = new KeyVaultClient(cred);
 
             // get mySecret
+            // this will fail without proper permissions so make sure to check results
             SecretBundle secret = kvClient.getSecret(kvUrl, "mySecret");
             System.out.println(secret.value());
 
             // create myNewSecret
+            // this will fail without proper permissions so make sure to check results
             SetSecretRequest req = new SetSecretRequest.Builder(kvUrl, "myNewSecret", "My new secret value").build();
-            kvClient.setSecret(req);
+            secret = kvClient.setSecret(req);
+            System.out.println(secret.id());
 
             // get myNewSecret
-            SecretBundle newSecret = kvClient.getSecret(kvUrl, "myNewSecret");
-            System.out.println(newSecret.value());
+            // this will fail without proper permissions so make sure to check results
+            secret = kvClient.getSecret(kvUrl, "myNewSecret");
+            System.out.println(secret.value());
 
             // delete myNewSecret
-            kvClient.deleteSecret(kvUrl, "myNewSecret");
+            // this will fail without proper permissions so make sure to check results
+            secret = kvClient.deleteSecret(kvUrl, "myNewSecret");
+            System.out.println(secret.id());
 
             // myNewSecret should be null
-            newSecret = kvClient.getSecret(kvUrl, "myNewSecret");
-            System.out.println(newSecret == null);
+            secret = kvClient.getSecret(kvUrl, "myNewSecret");
+            System.out.println(secret == null);
 
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
