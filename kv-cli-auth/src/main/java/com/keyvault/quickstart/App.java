@@ -41,7 +41,7 @@ public class App {
             // delete myNewSecret
             kvClient.deleteSecret(kvUrl, "myNewSecret");
 
-            // newSecret should be null
+            // myNewSecret should be null
             newSecret = kvClient.getSecret(kvUrl, "myNewSecret");
             System.out.println(newSecret == null);
 
