@@ -9,7 +9,7 @@ public class App {
 
     public static void main(String[] args) throws InterruptedException, IllegalArgumentException {
 
-        String keyVaultName = System.getenv("KEY_VAULT_NAME");
+        String keyVaultName = System.getenv("jkv_Name");
 
         if (keyVaultName == null || keyVaultName.isBlank()) {
             System.out.println("Set the KEY_VAULT_NAME environment variable");
@@ -23,9 +23,9 @@ public class App {
         try {
             AzureTokenCredentials cred = AzureCliCredentials.create();
 
-            KeyVaultClient kvc = new KeyVaultClient(cred);
+            KeyVaultClient kvClient = new KeyVaultClient(cred);
 
-            SecretBundle secret = kvc.getSecret(kvUri, "mySecret");
+            SecretBundle secret = kvClient.getSecret(kvUri, "mySecret");
 
             System.out.println(secret.value());
 
