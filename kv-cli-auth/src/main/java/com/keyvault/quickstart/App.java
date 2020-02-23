@@ -24,7 +24,7 @@ public class App {
             AzureTokenCredentials cred = null;
 
             // check for jqs_AuthType env var
-            String isMsi = System.getenv("MSI");
+            String isMsi = System.getenv("jqs_AuthType");
             if (isMsi != null && isMsi.equals("MSI")) {
                 // use Managed Identity
                 cred = new MSICredentials(AzureEnvironment.AZURE);
